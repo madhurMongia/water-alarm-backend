@@ -25,10 +25,9 @@ class WaterLevelView(APIView):
         tank = WaterTank.objects.get(id=tank_id)
         if not tank:
             raise ValidationError('Tank not found')
-        print(request.data)
         level = LevelSerializer(
-            data={'water_tank': tank_id, **request.data})
+            data=request.data)
         if(level.is_valid()):
-            level.save()
+            level.save(water_tank=tank)
             return Response(level.data)
         return Response(level.errors, status=400)
