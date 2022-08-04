@@ -1,6 +1,9 @@
 from django.db import models
 from django.conf import settings
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 User = settings.AUTH_USER_MODEL
 
 
@@ -31,3 +34,15 @@ class WaterLevel(models.Model):
 
     def __str__(self):
         return self.water_tank.name + " " + str(self.level)
+
+
+@receiver(post_save, sender=WaterLevel)
+def update_tank_level(sender, instance, created, **kwargs):
+    if created:
+        layer = get_channel_layer()
+        async_to_sync(layer.group_send)(
+            'tank_{}'.format(instance.water_tank.id),
+            {
+                "type": "level_update",
+                "message": instance.level
+            })

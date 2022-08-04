@@ -32,6 +32,7 @@ DEBUG = True
 INSTALLED_APPS = [
     'django.contrib.admin',
     'corsheaders',
+    'channels',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -73,16 +74,34 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
 
-
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
+
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+
+        'ENGINE': 'django.db.backends.postgresql',
+
+        'NAME': 'd3bpfsvt21m4qk',
+
+        'USER': 'fvmuheuwtrdaoi',
+
+        'PASSWORD': 'b95a8abcf2937a252ce38b12324fdc816d9e8bfc659720c79feafd8613b1a447',
+
+        'HOST': 'ec2-54-87-179-4.compute-1.amazonaws.com',
+
+        'PORT': '5432',
+
     }
+
 }
 
 
