@@ -34,15 +34,3 @@ class WaterLevel(models.Model):
 
     def __str__(self):
         return self.water_tank.name + " " + str(self.level)
-
-
-@receiver(post_save, sender=WaterLevel)
-def update_tank_level(sender, instance, created, **kwargs):
-    if created:
-        layer = get_channel_layer()
-        async_to_sync(layer.group_send)(
-            'tank_{}'.format(instance.water_tank.id),
-            {
-                "type": "level_update",
-                "message": instance.level
-            })

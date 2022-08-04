@@ -2,6 +2,7 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 from .models import WaterLevel, WaterTank
 from asgiref.sync import async_to_sync
+from datetime import datetime
 
 
 class CurrentLevelConsumer(WebsocketConsumer):
@@ -22,6 +23,14 @@ class CurrentLevelConsumer(WebsocketConsumer):
         type = text_data_json['type']
         if(type == 'current_level'):
             self.get_current_level()
+        if(type == 'update_level'):
+            async_to_sync(self.channel_layer.group_send)(
+                'tank_{}'.format(self.tank.id),
+                {
+                    "type": "level_update",
+                    "message": message
+                }
+            )
 
     def set_tank(self, tank_id):
         self.tank = WaterTank.objects.get(id=tank_id)
@@ -38,7 +47,17 @@ class CurrentLevelConsumer(WebsocketConsumer):
                 'message': 'No level data'
             }))
 
-    def level_update(self, event):
+    def level_update(self, level):
+        true_level = self.tank.depth - level
         self.send(text_data=json.dumps({
-            'message': 'Current level is {}'.format(event['message'])
+            'message': true_level
         }))
+        current_time = datetime.now()
+        if current_time.minute == 0 and current_time.second == 0:
+            self.save_level(true_level)
+
+    def save_level(self, level):
+        WaterLevel.objects.create(
+            water_tank=self.tank,
+            level=level
+        )
