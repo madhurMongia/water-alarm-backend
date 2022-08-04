@@ -29,9 +29,14 @@ class CurrentLevelConsumer(WebsocketConsumer):
     def get_current_level(self):
         level = WaterLevel.objects.filter(
             water_tank=self.tank).order_by('-created_at').first()
-        self.send(text_data=json.dumps({
-            'message': 'Current level is {}'.format(level.level)
-        }))
+        if(level):
+            self.send(text_data=json.dumps({
+                'message': level.level
+            }))
+        else:
+            self.send(text_data=json.dumps({
+                'message': 'No level data'
+            }))
 
     def level_update(self, event):
         self.send(text_data=json.dumps({
