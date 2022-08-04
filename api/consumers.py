@@ -28,7 +28,7 @@ class CurrentLevelConsumer(WebsocketConsumer):
                 'tank_{}'.format(self.tank.id),
                 {
                     "type": "level_update",
-                    "message": message
+                    "message": message.get('level')
                 }
             )
 
@@ -47,8 +47,8 @@ class CurrentLevelConsumer(WebsocketConsumer):
                 'message': 'No level data'
             }))
 
-    def level_update(self, level):
-        true_level = self.tank.depth - level
+    def level_update(self, message):
+        true_level = self.tank.depth - int(message['message'])
         self.send(text_data=json.dumps({
             'message': true_level
         }))
